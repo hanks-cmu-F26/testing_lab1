@@ -69,7 +69,7 @@ public class SocialNetwork implements ISocialNetwork {
 	}
 
 	public void acceptAllFriendshipsTo(Account me) {
-		Collection<String> requests = new HashSet<>(me.getIncomingRequests());
+		Set<String> requests = new HashSet<>(me.getIncomingRequests());
 		requests.forEach(each -> {
 			Account accountForUserName = findAccountForUserName(each);
 			accountForUserName.friendshipAccepted(me);
@@ -178,12 +178,16 @@ public class SocialNetwork implements ISocialNetwork {
 
 	@Override
 	public void autoAcceptFriendships() {
-		// TODO Auto-generated method stub
+		if (loggedInUser != null) {
+			loggedInUser.autoAcceptFriendships();
+		}
 	}
 
 	@Override
 	public void cancelAutoAcceptFriendships() {
-		// TODO Auto-generated method stub
+		if (loggedInUser != null) {
+			loggedInUser.cancelAutoAcceptFriendships();
+		}
 	}
 
 	@Override

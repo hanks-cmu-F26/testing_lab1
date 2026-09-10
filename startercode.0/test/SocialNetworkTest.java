@@ -697,4 +697,65 @@ public class SocialNetworkTest {
 		assertTrue(sn.recommendFriends().isEmpty());
 	}
 
+	@Test
+	public void cancelAutoAcceptFriendshipsStopsFutureAutoAcceptance() {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.autoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", her);
+		assertTrue(me.hasFriend("Cecile"));
+		assertEquals(0, me.getIncomingRequests().size());
+		sn.cancelAutoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", another);
+		assertFalse(me.hasFriend("Serra"));
+		assertEquals(1, me.getIncomingRequests().size());
+		assertTrue(me.getIncomingRequests().contains("Serra"));
+	}
+
+	@Test
+	public void cancelAutoAcceptFriendshipsRequiresExplicitAcceptanceAfter() {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.autoAcceptFriendships();
+		sn.cancelAutoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", her);
+		assertTrue(me.getIncomingRequests().contains("Cecile"));
+		sn.acceptFriendshipFrom("Cecile", me);
+		assertTrue(me.hasFriend("Cecile"));
+		assertEquals(0, me.getIncomingRequests().size());
+	}
+
+	@Test
+	public void cancelAutoAcceptFriendshipsWhenNotEnabled() {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		sn.cancelAutoAcceptFriendships();
+		her = sn.join("Cecile");
+		sn.sendFriendshipTo("Hakan", her);
+		assertFalse(me.hasFriend("Cecile"));
+		assertEquals(1, me.getIncomingRequests().size());
+	}
+
+	@Test
+	public void multipleToggleBetweenAutoAcceptAndCancel() {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.autoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", her);
+		assertTrue(me.hasFriend("Cecile"));
+		sn.cancelAutoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", another);
+		assertFalse(me.hasFriend("Serra"));
+		assertEquals(1, me.getIncomingRequests().size());
+	}
+
 }
