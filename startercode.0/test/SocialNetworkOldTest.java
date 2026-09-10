@@ -94,12 +94,14 @@ public class SocialNetworkOldTest {
 		assertFalse(her.hasFriend("John"));
 	}
 
+	/*
 	@Test
 	public void ListEmptyNetwork() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Collection<String> members = sn.listMembers();
 		assertEquals(0, members.size());
 	}
+	*/
 
 	@Test 
 	public void getOutgoingRequests() throws Exception {

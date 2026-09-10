@@ -11,6 +11,10 @@ public class SocialNetwork implements ISocialNetwork {
 	// the one member currently logged in to this SocialNetwork instance
 	private Account loggedInUser = null;
 
+	private void requireLoggedIn() throws NoUserLoggedInException {
+		if (loggedInUser == null) throw new NoUserLoggedInException();
+	}
+
 	// join SN with a new user name
 	public Account join(String userName) {
 		if (userName == null || userName.isEmpty()) return null;
@@ -32,7 +36,8 @@ public class SocialNetwork implements ISocialNetwork {
 	}
 	
 	// list user names of all members visible to the logged-in user
-	public Set<String> listMembers() {
+	public Set<String> listMembers() throws NoUserLoggedInException {
+		requireLoggedIn();
 		Set<String> members = new HashSet<String>();
 		for (Account each : accounts) {
 			if (isVisibleToLoggedInUser(each)) members.add(each.getUserName());
@@ -126,74 +131,81 @@ public class SocialNetwork implements ISocialNetwork {
 	}
 
 	@Override
-	public boolean hasMember(String userName) {
+	public boolean hasMember(String userName) throws NoUserLoggedInException {
+		requireLoggedIn();
 		if (userName == null) return false;
 		return isVisibleToLoggedInUser(findAccountForUserName(userName));
 	}
 
 	@Override
-	public void sendFriendshipTo(String userName) {
-		if (loggedInUser == null || userName == null) return;
+	public void sendFriendshipTo(String userName) throws NoUserLoggedInException {
+		requireLoggedIn();
+		if (userName == null) return;
 		Account target = findAccountForUserName(userName);
 		if (!isVisibleToLoggedInUser(target)) return;   // blocked: cannot even see her
 		target.requestFriendship(loggedInUser);
 	}
 
 	@Override
-	public void block(String userName) {
-		if (loggedInUser == null || userName == null) return;
+	public void block(String userName) throws NoUserLoggedInException {
+		requireLoggedIn();
+		if (userName == null) return;
 		loggedInUser.block(userName);
 	}
 
 	@Override
-	public void unblock(String userName) {
-		if (loggedInUser == null || userName == null) return;
+	public void unblock(String userName) throws NoUserLoggedInException {
+		requireLoggedIn();
+		if (userName == null) return;
 		loggedInUser.unblock(userName);
 	}
 
 	@Override
-	public void sendFriendshipCancellationTo(String userName) {
+	public void sendFriendshipCancellationTo(String userName) throws NoUserLoggedInException {
+		requireLoggedIn();
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void acceptFriendshipFrom(String userName) {
+	public void acceptFriendshipFrom(String userName) throws NoUserLoggedInException {
+		requireLoggedIn();
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void acceptAllFriendships() {
+	public void acceptAllFriendships() throws NoUserLoggedInException {
+		requireLoggedIn();
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void rejectFriendshipFrom(String userName) {
+	public void rejectFriendshipFrom(String userName) throws NoUserLoggedInException {
+		requireLoggedIn();
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void rejectAllFriendships() {
+	public void rejectAllFriendships() throws NoUserLoggedInException {
+		requireLoggedIn();
 		// TODO Auto-generated method stub
 	}
 
 	@Override
-	public void autoAcceptFriendships() {
-		if (loggedInUser != null) {
-			loggedInUser.autoAcceptFriendships();
-		}
+	public void autoAcceptFriendships() throws NoUserLoggedInException {
+		requireLoggedIn();
+		loggedInUser.autoAcceptFriendships();
 	}
 
 	@Override
-	public void cancelAutoAcceptFriendships() {
-		if (loggedInUser != null) {
-			loggedInUser.cancelAutoAcceptFriendships();
-		}
+	public void cancelAutoAcceptFriendships() throws NoUserLoggedInException {
+		requireLoggedIn();
+		loggedInUser.cancelAutoAcceptFriendships();
 	}
 
 	@Override
-	public Set<String> recommendFriends() {
+	public Set<String> recommendFriends() throws NoUserLoggedInException {
+		requireLoggedIn();
 		Set<String> recommendations = new HashSet<String>();
-		if (loggedInUser == null) return recommendations;
 
 		// count, for every candidate, how many of my friends they are friends with
 		Map<String, Integer> commonFriendCount = new HashMap<String, Integer>();
@@ -218,7 +230,8 @@ public class SocialNetwork implements ISocialNetwork {
 	}
 
 	@Override
-	public void leave() {
+	public void leave() throws NoUserLoggedInException {
+		requireLoggedIn();
 		// TODO Auto-generated method stub
 	}
 
