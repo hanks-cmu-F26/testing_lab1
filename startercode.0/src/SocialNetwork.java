@@ -1,10 +1,14 @@
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Collection;
 import java.util.Set;
 
 public class SocialNetwork implements ISocialNetwork {
 	
 	private Collection<Account> accounts = new HashSet<Account>();
+
+	// the one member currently logged in to this SocialNetwork instance
 	private Account loggedInUser = null;
 
 	// join SN with a new user name
@@ -27,13 +31,21 @@ public class SocialNetwork implements ISocialNetwork {
 		return null;
 	}
 	
-	// list user names of all members
+	// list user names of all members visible to the logged-in user
 	public Set<String> listMembers() {
 		Set<String> members = new HashSet<String>();
 		for (Account each : accounts) {
-			members.add(each.getUserName());
+			if (isVisibleToLoggedInUser(each)) members.add(each.getUserName());
 		}
 		return members;
+	}
+
+	// an account is visible to the logged-in user unless it has blocked her
+	private boolean isVisibleToLoggedInUser(Account account) {
+		if (account == null) return false;
+		if (loggedInUser == null) return true;
+		if (account == loggedInUser) return true;   // you can always see yourself
+		return !account.hasBlocked(loggedInUser.getUserName());
 	}
 	
 	// from my account, send a friend request to user with userName from my account
@@ -115,23 +127,28 @@ public class SocialNetwork implements ISocialNetwork {
 
 	@Override
 	public boolean hasMember(String userName) {
-		// TODO Auto-generated method stub
-		return false;
+		if (userName == null) return false;
+		return isVisibleToLoggedInUser(findAccountForUserName(userName));
 	}
 
 	@Override
 	public void sendFriendshipTo(String userName) {
-		// TODO Auto-generated method stub
+		if (loggedInUser == null || userName == null) return;
+		Account target = findAccountForUserName(userName);
+		if (!isVisibleToLoggedInUser(target)) return;   // blocked: cannot even see her
+		target.requestFriendship(loggedInUser);
 	}
 
 	@Override
 	public void block(String userName) {
-		// TODO Auto-generated method stub
+		if (loggedInUser == null || userName == null) return;
+		loggedInUser.block(userName);
 	}
 
 	@Override
 	public void unblock(String userName) {
-		// TODO Auto-generated method stub
+		if (loggedInUser == null || userName == null) return;
+		loggedInUser.unblock(userName);
 	}
 
 	@Override
@@ -171,8 +188,29 @@ public class SocialNetwork implements ISocialNetwork {
 
 	@Override
 	public Set<String> recommendFriends() {
-		// TODO Auto-generated method stub
-		return null;
+		Set<String> recommendations = new HashSet<String>();
+		if (loggedInUser == null) return recommendations;
+
+		// count, for every candidate, how many of my friends they are friends with
+		Map<String, Integer> commonFriendCount = new HashMap<String, Integer>();
+		for (String friendName : loggedInUser.getFriends()) {
+			Account friend = findAccountForUserName(friendName);
+			if (friend == null) continue;
+			for (String candidate : friend.getFriends()) {
+				if (candidate.equals(loggedInUser.getUserName())) continue;  // not me
+				if (loggedInUser.hasFriend(candidate)) continue;             // not already a friend
+				Integer soFar = commonFriendCount.get(candidate);
+				commonFriendCount.put(candidate, soFar == null ? 1 : soFar + 1);
+			}
+		}
+
+		for (Map.Entry<String, Integer> each : commonFriendCount.entrySet()) {
+			if (each.getValue() < 2) continue;                          // needs at least two
+			if (loggedInUser.hasBlocked(each.getKey())) continue;       // not someone I blocked
+			if (!isVisibleToLoggedInUser(findAccountForUserName(each.getKey()))) continue;
+			recommendations.add(each.getKey());
+		}
+		return recommendations;
 	}
 
 	@Override
