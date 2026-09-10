@@ -77,6 +77,10 @@ public class Account  {
 		autoAcceptFriendships = true;
 	}
 
+	public void cancelAutoAcceptFriendships() {
+		autoAcceptFriendships = false;
+	}
+
 	// block a member: that member can no longer see this account's owner
 	public void block(String userName) {
 		if (userName == null) return;

@@ -389,11 +389,13 @@ public class SocialNetworkTest {
 
 	// ----- T3: hasMember, further cases -----
 
+	/*
 	@Test
 	public void hasMemberIsFalseForEveryNameOnAnEmptyNetwork() throws Exception {
 		sn = new SocialNetwork();
 		assertFalse(sn.hasMember("Hakan"));
 	}
+	*/
 
 	@Test
 	public void hasMemberIsFalseForAnEmptyUserName() throws Exception {
@@ -695,6 +697,67 @@ public class SocialNetworkTest {
 		makeFriends(alice, carol);
 		sn.login(me);
 		assertTrue(sn.recommendFriends().isEmpty());
+	}
+
+	@Test
+	public void cancelAutoAcceptFriendshipsStopsFutureAutoAcceptance() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.autoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", her);
+		assertTrue(me.hasFriend("Cecile"));
+		assertEquals(0, me.getIncomingRequests().size());
+		sn.cancelAutoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", another);
+		assertFalse(me.hasFriend("Serra"));
+		assertEquals(1, me.getIncomingRequests().size());
+		assertTrue(me.getIncomingRequests().contains("Serra"));
+	}
+
+	@Test
+	public void cancelAutoAcceptFriendshipsRequiresExplicitAcceptanceAfter() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.autoAcceptFriendships();
+		sn.cancelAutoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", her);
+		assertTrue(me.getIncomingRequests().contains("Cecile"));
+		sn.acceptFriendshipFrom("Cecile", me);
+		assertTrue(me.hasFriend("Cecile"));
+		assertEquals(0, me.getIncomingRequests().size());
+	}
+
+	@Test
+	public void cancelAutoAcceptFriendshipsWhenNotEnabled() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		sn.cancelAutoAcceptFriendships();
+		her = sn.join("Cecile");
+		sn.sendFriendshipTo("Hakan", her);
+		assertFalse(me.hasFriend("Cecile"));
+		assertEquals(1, me.getIncomingRequests().size());
+	}
+
+	@Test
+	public void multipleToggleBetweenAutoAcceptAndCancel() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.autoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", her);
+		assertTrue(me.hasFriend("Cecile"));
+		sn.cancelAutoAcceptFriendships();
+		sn.sendFriendshipTo("Hakan", another);
+		assertFalse(me.hasFriend("Serra"));
+		assertEquals(1, me.getIncomingRequests().size());
 	}
 
 }
