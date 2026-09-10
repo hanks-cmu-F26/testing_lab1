@@ -50,6 +50,27 @@ public class AccountTest {
 		her.friendshipAccepted(me);
 		assertFalse(me.getIncomingRequests().contains(her.getUserName()));
 	}
+
+	@Test
+	public void acceptingFriendRequestResultsInMutualFriendship() {
+		me.requestFriendship(her);
+		her.friendshipAccepted(me);
+
+		assertTrue(me.hasFriend(her.getUserName()));
+		assertTrue(her.hasFriend(me.getUserName()));
+	}
+
+	@Test
+	public void rejectingFriendRequestMustClearAssociatedIncomingAndOutgoingRequests() {
+		me.requestFriendship(her);
+		assertTrue(me.getIncomingRequests().contains(her.getUserName()));
+		assertTrue(her.getOutgoingRequests().contains(me.getUserName()));
+
+		her.friendshipRejected(me);
+
+		assertFalse(me.getIncomingRequests().contains(her.getUserName()));
+		assertFalse(her.getOutgoingRequests().contains(me.getUserName()));
+	}
 	
 	@Test
 	public void everybodyAreFriends() {
@@ -64,7 +85,7 @@ public class AccountTest {
 		assertTrue(her.hasFriend(me.getUserName()));
 		assertTrue(her.hasFriend(another.getUserName()));
 		assertTrue(another.hasFriend(her.getUserName()));
-		assertTrue(her.hasFriend(me.getUserName()));
+		assertTrue(another.hasFriend(me.getUserName()));
 	}
 	
 	@Test
