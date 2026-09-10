@@ -1,7 +1,7 @@
 import java.util.HashSet;
 import java.util.Collection;
 
-public class SocialNetwork {
+public class SocialNetwork implements ISocialNetwork {
 	
 	private Collection<Account> accounts = new HashSet<Account>();
 
@@ -85,15 +85,15 @@ public class SocialNetwork {
 	}
 
 	public void leave(Account me) {
-    for (String each : new HashSet<>(me.getFriends())) {
-        findAccountForUserName(each).cancelFriendship(me);
-    }
-    for (Account each : accounts) {
-        each.getIncomingRequests().remove(me.getUserName());
-        each.getOutgoingRequests().remove(me.getUserName());
-    }
-    accounts.remove(me);
-}
+		for (String each : new HashSet<>(me.getFriends())) {
+			findAccountForUserName(each).cancelFriendship(me);
+		}
+		for (Account each : accounts) {
+			each.getIncomingRequests().remove(me.getUserName());
+			each.getOutgoingRequests().remove(me.getUserName());
+		}
+		accounts.remove(me);
+	}
 
 	public void autoAcceptFriendshipsTo(Account me) {
 		me.autoAcceptFriendships();

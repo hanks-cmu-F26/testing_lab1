@@ -2,6 +2,7 @@ import java.util.Set;
 
 public interface ISocialNetwork {
 
+	
 	/*
 	 * join the social network and get an Account handle for logging in
 	 */
