@@ -5,6 +5,7 @@ import java.util.Set;
 public class SocialNetwork implements ISocialNetwork {
 	
 	private Collection<Account> accounts = new HashSet<Account>();
+	private Account loggedInUser = null;
 
 	// join SN with a new user name
 	public Account join(String userName) {
@@ -104,7 +105,11 @@ public class SocialNetwork implements ISocialNetwork {
 
 	@Override
 	public Account login(Account me) {
-		// TODO Auto-generated method stub
+		if (me == null) return null;
+		if (accounts.contains(me)) {
+			loggedInUser = me;
+			return me;
+		}
 		return null;
 	}
 

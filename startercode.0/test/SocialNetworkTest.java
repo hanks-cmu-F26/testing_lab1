@@ -1,5 +1,6 @@
 import static org.junit.Assert.*;
 
+import java.beans.Transient;
 import java.util.Set;
 
 import org.junit.After;
@@ -62,5 +63,60 @@ public class SocialNetworkTest {
 		assertTrue(her.hasFriend("Hakan"));
 	}
 	
+	@Test
+	public void canLoginAfterJoining() {
+		sn = new SocialNetwork();
+		Account account = sn.join("Hakan");
+		Account loggedIn = sn.login(account);
+		assertNotNull(loggedIn);
+		assertEquals("Hakan", loggedIn.getUserName());
+	}
+
+	@Test
+	public void loginReturnsNullForNullAccount() {
+		sn = new SocialNetwork();
+		Account loggedIn = sn.login(null);
+		assertNull(loggedIn);
+	}
+
+	@Test
+	public void cannotLoginWithAccountNotInNetwork() {
+		sn = new SocialNetwork();
+		Account account = new Account("Hakan");
+		Account loggedIn = sn.login(account);
+		assertNull(loggedIn);
+	}
+
+	@Test
+	public void canSwitchAccountsWithoutLoggingOut() {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		
+		// Login as Hakan
+		Account first = sn.login(me);
+		assertNotNull(first);
+		assertEquals("Hakan", first.getUserName());
+		
+		// Switch to Cecile without logging out
+		Account second = sn.login(her);
+		assertNotNull(second);
+		assertEquals("Cecile", second.getUserName());
+	}
+
+	@Test
+	public void loginMultipleTimes() {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		
+		// Login first time
+		Account first = sn.login(me);
+		assertNotNull(first);
+		
+		// Login same account again
+		Account second = sn.login(me);
+		assertNotNull(second);
+		assertEquals("Hakan", second.getUserName());
+	}
 
 }
