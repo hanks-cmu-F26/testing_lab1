@@ -1,5 +1,6 @@
 import java.util.HashSet;
 import java.util.Collection;
+import java.util.Set;
 
 public class SocialNetwork implements ISocialNetwork {
 	
@@ -26,8 +27,8 @@ public class SocialNetwork implements ISocialNetwork {
 	}
 	
 	// list user names of all members
-	public Collection<String> listMembers() {
-		Collection<String> members = new HashSet<String>();
+	public Set<String> listMembers() {
+		Set<String> members = new HashSet<String>();
 		for (Account each : accounts) {
 			members.add(each.getUserName());
 		}
@@ -97,6 +98,81 @@ public class SocialNetwork implements ISocialNetwork {
 
 	public void autoAcceptFriendshipsTo(Account me) {
 		me.autoAcceptFriendships();
+	}
+
+	// ----- ISocialNetwork stubs (T1): created to satisfy the compiler only -----
+
+	@Override
+	public Account login(Account me) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean hasMember(String userName) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void sendFriendshipTo(String userName) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void block(String userName) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void unblock(String userName) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void sendFriendshipCancellationTo(String userName) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void acceptFriendshipFrom(String userName) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void acceptAllFriendships() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void rejectFriendshipFrom(String userName) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void rejectAllFriendships() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void autoAcceptFriendships() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void cancelAutoAcceptFriendships() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public Set<String> recommendFriends() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void leave() {
+		// TODO Auto-generated method stub
 	}
 
 }

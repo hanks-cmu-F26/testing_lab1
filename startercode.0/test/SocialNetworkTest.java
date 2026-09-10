@@ -9,6 +9,9 @@ import org.junit.Test;
 
 public class SocialNetworkTest {
 
+	SocialNetwork sn;
+	Account me, her, another;
+
 	// these are some example tests: you can merge them with your own tests from A0 
     
 	@Before
