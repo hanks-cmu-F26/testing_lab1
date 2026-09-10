@@ -21,11 +21,12 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test 
-	public void OneJoinNetwork() {
+	public void OneJoinNetwork() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		assertNotNull(me);
 		assertEquals("Hakan", me.getUserName());
+		sn.login(me);
 		Collection<String> members = sn.listMembers();
 		assertEquals(1, members.size());
 		assertTrue(members.contains("Hakan"));
@@ -33,10 +34,11 @@ public class SocialNetworkOldTest {
 
 	
 	@Test 
-	public void TwoJoinNetwork() {
+	public void TwoJoinNetwork() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
-		sn.join("Hakan");
+		Account me = sn.join("Hakan");
 		sn.join("Cecile");
+		sn.login(me);
 		Collection<String> members = sn.listMembers();
 		assertEquals(2, members.size());
 		assertTrue(members.contains("Hakan"));
@@ -44,7 +46,7 @@ public class SocialNetworkOldTest {
 	}
 	
 	@Test 
-	public void SendFriendRequest() {
+	public void SendFriendRequest() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -53,7 +55,7 @@ public class SocialNetworkOldTest {
 	}
 	
 	@Test 
-	public void AcceptFriendRequest() {
+	public void AcceptFriendRequest() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account john = sn.join("John");
 		Account mary = sn.join("Mary");
@@ -64,7 +66,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test
-	public void FindNonExistingUser() {
+	public void FindNonExistingUser() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -74,7 +76,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test
-	public void SendFriendRequestToNonExistingUser() {
+	public void SendFriendRequestToNonExistingUser() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -83,7 +85,7 @@ public class SocialNetworkOldTest {
 	}
 	
 	@Test
-	public void AcceptFriendRequestFromNonExistingUser() {
+	public void AcceptFriendRequestFromNonExistingUser() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -93,14 +95,14 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test
-	public void ListEmptyNetwork() {
+	public void ListEmptyNetwork() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Collection<String> members = sn.listMembers();
 		assertEquals(0, members.size());
 	}
 
 	@Test 
-	public void getOutgoingRequests() {
+	public void getOutgoingRequests() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -109,7 +111,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test
-	public void AcceptAllFriendship() {
+	public void AcceptAllFriendship() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -122,7 +124,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test 
-	public void rejectFriendship() {
+	public void rejectFriendship() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -133,7 +135,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test 
-	public void rejectAllFriendships() {
+	public void rejectAllFriendships() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -146,7 +148,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test 
-	public void cancelFriendship() {
+	public void cancelFriendship() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -157,19 +159,20 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test 
-	public void leavingNetwork() {
+	public void leavingNetwork() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
 		sn.sendFriendshipTo("Cecile", me);
 		sn.acceptFriendshipFrom("Hakan", her);
 		sn.leave(me);
+		sn.login(her);
 		assertFalse(her.hasFriend("Hakan"));
 		assertFalse(sn.listMembers().contains("Hakan"));
 	}
 
 	@Test 
-	public void autoAcceptFriendship() {
+	public void autoAcceptFriendship() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -180,7 +183,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test 
-	public void leavingWhileReceivingFriendRequests() {
+	public void leavingWhileReceivingFriendRequests() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -190,7 +193,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test 
-	public void leavingWhileGivingFriendRequests() {
+	public void leavingWhileGivingFriendRequests() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		Account her = sn.join("Cecile");
@@ -200,7 +203,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test
-	public void requestingNullFriendship() {
+	public void requestingNullFriendship() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		me.requestFriendship(null);
@@ -208,7 +211,7 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test
-	public void joinWithExistingName() {
+	public void joinWithExistingName() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		sn.join("Hakan");
 		Account duplicate = sn.join("Hakan");
@@ -216,19 +219,19 @@ public class SocialNetworkOldTest {
 	}
 
 	@Test
-	public void joinWithNullUserName() {
+	public void joinWithNullUserName() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		assertNull(sn.join(null));
 	}
 
 	@Test
-	public void joiniWithEmptyUserName() {
+	public void joiniWithEmptyUserName() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		assertNull(sn.join(""));
 	}
 
 	@Test
-	public void noAcceptWithoutRequest() {
+	public void noAcceptWithoutRequest() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account hakan = sn.join("Hakan");
 		Account serra = sn.join("Serra");

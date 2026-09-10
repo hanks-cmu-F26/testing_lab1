@@ -25,26 +25,28 @@ public class SocialNetworkTest {
 	}
 
 	@Test 
-	public void canJoinSocialNetwork() {
+	public void canJoinSocialNetwork() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
 		Account me = sn.join("Hakan");
 		assertEquals("Hakan", me.getUserName());
 	}
 	
 	@Test 
-	public void canListSingleMemberOfSocialNetworkAfterOnePersonJoiningAndSizeOfNetworkEqualsOne() {
+	public void canListSingleMemberOfSocialNetworkAfterOnePersonJoiningAndSizeOfNetworkEqualsOne() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
-		sn.join("Hakan");
+		Account me = sn.join("Hakan");
+		sn.login(me);
 		Set<String> members = sn.listMembers();
 		assertEquals(1, members.size());
 		assertTrue(members.contains("Hakan"));
 	}
 	
 	@Test 
-	public void twoPeopleCanJoinSocialNetworkAndSizeOfNetworkEqualsTwo() {
+	public void twoPeopleCanJoinSocialNetworkAndSizeOfNetworkEqualsTwo() throws Exception {
 		SocialNetwork sn = new SocialNetwork();
-		sn.join("Hakan");
+		Account me = sn.join("Hakan");
 		sn.join("Cecile");
+		sn.login(me);
 		Set<String> members = sn.listMembers();
 		assertEquals(2, members.size());
 		assertTrue(members.contains("Hakan"));
@@ -52,7 +54,7 @@ public class SocialNetworkTest {
 	}
 	
 	@Test 
-	public void sendAndAcceptFriendRequestToBecomeFriends() {
+	public void sendAndAcceptFriendRequestToBecomeFriends() throws Exception {
 		// test sending friend request
 	    sn = new SocialNetwork();
 		me = sn.join("Hakan");
@@ -64,7 +66,7 @@ public class SocialNetworkTest {
 	}
 	
 	@Test
-	public void canLoginAfterJoining() {
+	public void canLoginAfterJoining() throws Exception {
 		sn = new SocialNetwork();
 		Account account = sn.join("Hakan");
 		Account loggedIn = sn.login(account);
@@ -73,14 +75,14 @@ public class SocialNetworkTest {
 	}
 
 	@Test
-	public void loginReturnsNullForNullAccount() {
+	public void loginReturnsNullForNullAccount() throws Exception {
 		sn = new SocialNetwork();
 		Account loggedIn = sn.login(null);
 		assertNull(loggedIn);
 	}
 
 	@Test
-	public void cannotLoginWithAccountNotInNetwork() {
+	public void cannotLoginWithAccountNotInNetwork() throws Exception {
 		sn = new SocialNetwork();
 		Account account = new Account("Hakan");
 		Account loggedIn = sn.login(account);
@@ -88,7 +90,7 @@ public class SocialNetworkTest {
 	}
 
 	@Test
-	public void canSwitchAccountsWithoutLoggingOut() {
+	public void canSwitchAccountsWithoutLoggingOut() throws Exception {
 		sn = new SocialNetwork();
 		me = sn.join("Hakan");
 		her = sn.join("Cecile");
@@ -105,7 +107,7 @@ public class SocialNetworkTest {
 	}
 
 	@Test
-	public void loginMultipleTimes() {
+	public void loginMultipleTimes() throws Exception {
 		sn = new SocialNetwork();
 		me = sn.join("Hakan");
 		
@@ -117,6 +119,582 @@ public class SocialNetworkTest {
 		Account second = sn.login(me);
 		assertNotNull(second);
 		assertEquals("Hakan", second.getUserName());
+	}
+
+	// ----- T3: hasMember -----
+
+	@Test
+	public void hasMemberIsTrueForAMemberWhoJoined() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.join("Cecile");
+		sn.login(me);
+		assertTrue(sn.hasMember("Cecile"));
+	}
+
+	@Test
+	public void hasMemberIsTrueForTheLoggedInMemberHerself() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void hasMemberIsFalseForSomeoneWhoNeverJoined() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		assertFalse(sn.hasMember("Ghost"));
+	}
+
+	@Test
+	public void hasMemberIsFalseForNullUserName() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		assertFalse(sn.hasMember(null));
+	}
+
+	// ----- T5: block -----
+
+	@Test
+	public void loggedInMemberCanSendAFriendRequestWithTheNewApi() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.sendFriendshipTo("Cecile");
+		assertTrue(her.getIncomingRequests().contains("Hakan"));
+	}
+
+	@Test
+	public void aBlockedMemberCannotSeeTheBlocker() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.login(her);
+		assertFalse(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void aBlockedMemberDoesNotSeeTheBlockerInTheMemberList() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.login(her);
+		assertFalse(sn.listMembers().contains("Hakan"));
+		assertTrue(sn.listMembers().contains("Cecile"));
+	}
+
+	@Test
+	public void theBlockerCanStillSeeTheBlockedMember() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		assertTrue(sn.hasMember("Cecile"));
+	}
+
+	@Test
+	public void blockingDoesNotAffectOtherMembers() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.login(another);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void aBlockedMemberCannotSendAFriendRequestToTheBlocker() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.login(her);
+		sn.sendFriendshipTo("Hakan");
+		assertFalse(me.getIncomingRequests().contains("Cecile"));
+	}
+
+	// ----- T7: recommendFriends -----
+	private void makeFriends(Account a, Account b) {
+		a.requestFriendship(b);
+		b.friendshipAccepted(a);
+	}
+
+	@Test
+	public void recommendsAMemberWhoIsFriendsWithTwoOfMyFriends() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		Account carol = sn.join("Carol");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(carol, alice);
+		makeFriends(carol, bob);
+		sn.login(me);
+		assertTrue(sn.recommendFriends().contains("Carol"));
+	}
+
+	@Test
+	public void doesNotRecommendAMemberWithOnlyOneFriendInCommon() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		Account dave = sn.join("Dave");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(dave, alice);
+		sn.login(me);
+		assertFalse(sn.recommendFriends().contains("Dave"));
+	}
+
+	@Test
+	public void doesNotRecommendMembersWhoAreAlreadyMyFriends() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(alice, bob);
+		sn.login(me);
+		assertFalse(sn.recommendFriends().contains("Alice"));
+		assertFalse(sn.recommendFriends().contains("Bob"));
+	}
+
+	@Test
+	public void doesNotRecommendTheLoggedInMemberHerself() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(alice, bob);
+		sn.login(me);
+		assertFalse(sn.recommendFriends().contains("Hakan"));
+	}
+
+	@Test
+	public void doesNotRecommendAMemberBlockedByTheLoggedInUser() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		Account carol = sn.join("Carol");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(carol, alice);
+		makeFriends(carol, bob);
+		sn.login(me);
+		sn.block("Carol");
+		assertFalse(sn.recommendFriends().contains("Carol"));
+	}
+
+	@Test
+	public void recommendsNobodyWhenTheLoggedInMemberHasNoFriends() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.join("Alice");
+		sn.login(me);
+		assertTrue(sn.recommendFriends().isEmpty());
+	}
+
+	// ----- T6: unblock -----
+
+	@Test
+	public void unblockingMakesTheBlockerVisibleAgain() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.unblock("Cecile");
+		sn.login(her);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void anUnblockedMemberSeesTheBlockerInTheMemberListAgain() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.unblock("Cecile");
+		sn.login(her);
+		assertTrue(sn.listMembers().contains("Hakan"));
+	}
+
+	@Test
+	public void anUnblockedMemberCanBefriendTheBlockerAgain() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.unblock("Cecile");
+		sn.login(her);
+		sn.sendFriendshipTo("Hakan");
+		assertTrue(me.getIncomingRequests().contains("Cecile"));
+	}
+
+	@Test
+	public void unblockingOneMemberLeavesOtherBlocksInPlace() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.block("Serra");
+		sn.unblock("Cecile");
+		sn.login(her);
+		assertTrue(sn.hasMember("Hakan"));
+		sn.login(another);
+		assertFalse(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void unblockingAMemberWhoWasNeverBlockedChangesNothing() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.unblock("Cecile");
+		sn.login(her);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void unblockingANullUserNameIsHarmless() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		sn.unblock(null);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	// ----- T3: hasMember, further cases -----
+
+	@Test
+	public void hasMemberIsFalseForEveryNameOnAnEmptyNetwork() throws Exception {
+		sn = new SocialNetwork();
+		assertFalse(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void hasMemberIsFalseForAnEmptyUserName() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		assertFalse(sn.hasMember(""));
+	}
+
+	@Test
+	public void hasMemberIsCaseSensitive() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		assertTrue(sn.hasMember("Hakan"));
+		assertFalse(sn.hasMember("hakan"));
+		assertFalse(sn.hasMember("HAKAN"));
+	}
+
+	@Test
+	public void hasMemberSeesSomebodyWhoJoinsAfterLogin() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		assertFalse(sn.hasMember("Cecile"));
+		sn.join("Cecile");
+		assertTrue(sn.hasMember("Cecile"));
+	}
+
+	@Test
+	public void hasMemberIsFalseOnceThatMemberHasLeft() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		assertTrue(sn.hasMember("Cecile"));
+		sn.leave(her);
+		assertFalse(sn.hasMember("Cecile"));
+	}
+
+	@Test
+	public void hasMemberIsTrueForEveryMemberOfALargerNetwork() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.join("Cecile");
+		sn.join("Serra");
+		sn.login(me);
+		assertTrue(sn.hasMember("Hakan"));
+		assertTrue(sn.hasMember("Cecile"));
+		assertTrue(sn.hasMember("Serra"));
+		assertFalse(sn.hasMember("Ghost"));
+	}
+
+	// ----- T5: block, further cases -----
+
+	@Test
+	public void blockingTheSameMemberTwiceIsIdempotent() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.block("Cecile");
+		sn.login(her);
+		assertFalse(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void blockingANullUserNameIsHarmless() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block(null);
+		sn.login(her);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void blockingSomeoneWhoIsNotAMemberIsHarmless() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Ghost");
+		sn.login(her);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void aBlockedMemberIsStillVisibleToEveryoneElse() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.login(another);
+		assertTrue(sn.hasMember("Cecile"));
+		assertTrue(sn.listMembers().contains("Cecile"));
+	}
+
+	@Test
+	public void blockingHidesTheBlockerFromTheBlockedMemberOnly() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.login(her);
+		Set<String> visible = sn.listMembers();
+		assertFalse(visible.contains("Hakan"));
+		assertTrue(visible.contains("Cecile"));
+		assertTrue(visible.contains("Serra"));
+	}
+
+	@Test
+	public void blockingYourselfDoesNotMakeYouInvisibleToYourself() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		sn.block("Hakan");
+		assertTrue(sn.hasMember("Hakan"));
+		assertTrue(sn.listMembers().contains("Hakan"));
+	}
+
+	@Test
+	public void twoMembersCanBlockEachOther() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.login(her);
+		sn.block("Hakan");
+		assertFalse(sn.hasMember("Hakan"));
+		sn.login(me);
+		assertFalse(sn.hasMember("Cecile"));
+	}
+
+	// ----- T6: unblock, further cases -----
+
+	@Test
+	public void unblockingTwiceIsHarmless() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.unblock("Cecile");
+		sn.unblock("Cecile");
+		sn.login(her);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void unblockingSomeoneWhoIsNotAMemberIsHarmless() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.unblock("Ghost");
+		sn.login(her);
+		assertTrue(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void aMemberCanBeBlockedAgainAfterBeingUnblocked() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		sn.login(me);
+		sn.block("Cecile");
+		sn.unblock("Cecile");
+		sn.block("Cecile");
+		sn.login(her);
+		assertFalse(sn.hasMember("Hakan"));
+	}
+
+	@Test
+	public void unblockingOnlyAffectsTheMemberWhoIssuedTheBlock() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		her = sn.join("Cecile");
+		another = sn.join("Serra");
+		sn.login(me);
+		sn.block("Serra");
+		sn.login(her);
+		sn.block("Serra");
+		sn.unblock("Serra");
+		sn.login(another);
+		assertTrue(sn.hasMember("Cecile"));
+		assertFalse(sn.hasMember("Hakan"));
+	}
+
+	// ----- T7: recommendFriends, further cases -----
+
+	@Test
+	public void recommendFriendsNeverReturnsNull() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		sn.login(me);
+		assertNotNull(sn.recommendFriends());
+	}
+
+	@Test
+	public void recommendsSeveralCandidatesAtOnce() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		Account carol = sn.join("Carol");
+		Account dan = sn.join("Dan");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(carol, alice);
+		makeFriends(carol, bob);
+		makeFriends(dan, alice);
+		makeFriends(dan, bob);
+		sn.login(me);
+		Set<String> recommended = sn.recommendFriends();
+		assertTrue(recommended.contains("Carol"));
+		assertTrue(recommended.contains("Dan"));
+		assertEquals(2, recommended.size());
+	}
+
+	@Test
+	public void recommendsAMemberSharingThreeFriends() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		Account eve = sn.join("Eve");
+		Account carol = sn.join("Carol");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(me, eve);
+		makeFriends(carol, alice);
+		makeFriends(carol, bob);
+		makeFriends(carol, eve);
+		sn.login(me);
+		assertTrue(sn.recommendFriends().contains("Carol"));
+	}
+
+	@Test
+	public void doesNotRecommendAMemberWhoBlockedTheLoggedInUser() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		Account carol = sn.join("Carol");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(carol, alice);
+		makeFriends(carol, bob);
+		sn.login(carol);
+		sn.block("Hakan");
+		sn.login(me);
+		assertFalse(sn.recommendFriends().contains("Carol"));
+	}
+
+	@Test
+	public void aRecommendedMemberIsNoLongerRecommendedOnceBefriended() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		Account carol = sn.join("Carol");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		makeFriends(carol, alice);
+		makeFriends(carol, bob);
+		sn.login(me);
+		assertTrue(sn.recommendFriends().contains("Carol"));
+		makeFriends(me, carol);
+		assertFalse(sn.recommendFriends().contains("Carol"));
+	}
+
+	@Test
+	public void recommendsNobodyWhenFriendsHaveNoOtherFriends() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account bob = sn.join("Bob");
+		makeFriends(me, alice);
+		makeFriends(me, bob);
+		sn.login(me);
+		assertTrue(sn.recommendFriends().isEmpty());
+	}
+
+	@Test
+	public void aMemberWithASingleFriendGetsNoRecommendations() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Hakan");
+		Account alice = sn.join("Alice");
+		Account carol = sn.join("Carol");
+		makeFriends(me, alice);
+		makeFriends(alice, carol);
+		sn.login(me);
+		assertTrue(sn.recommendFriends().isEmpty());
 	}
 
 }

@@ -14,6 +14,9 @@ public class Account  {
 	
 	// list of members who are friends of this account's owner
 	private Set<String> friends = new HashSet<String>();
+
+	// members this account's owner has blocked: they cannot see this owner
+	private Set<String> blockedMembers = new HashSet<String>();
 	
 	public Account(String userName) {
 		this.userName = userName;
@@ -72,6 +75,20 @@ public class Account  {
 
 	public void autoAcceptFriendships() {
 		autoAcceptFriendships = true;
+	}
+
+	// block a member: that member can no longer see this account's owner
+	public void block(String userName) {
+		if (userName == null) return;
+		blockedMembers.add(userName);
+	}
+
+	public void unblock(String userName) {
+		blockedMembers.remove(userName);
+	}
+
+	public boolean hasBlocked(String userName) {
+		return blockedMembers.contains(userName);
 	}
 
 	public void cancelFriendship(Account myAccount) {
