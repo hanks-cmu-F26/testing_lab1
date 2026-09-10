@@ -55,10 +55,10 @@ public class Account  {
 
 	// receive an acceptance from a member to whom a friend request has been sent and from whom no response has been received
 	public void friendshipAccepted(Account toAccount) {
-		if (!toAccount.incomingRequests.contains(this.getUserName())) {
+		if (toAccount == null || !toAccount.incomingRequests.contains(this.getUserName())) {
 			return;
 		}
-		friends.add(toAccount.getUserName());
+		this.friends.add(toAccount.getUserName());
 		toAccount.friends.add(this.getUserName());
 		toAccount.incomingRequests.remove(this.getUserName());
 		this.outgoingRequests.remove(toAccount.getUserName());
@@ -69,8 +69,11 @@ public class Account  {
 	}
 
 	public void friendshipRejected(Account myAccount) {
-		myAccount.incomingRequests.remove(this.getUserName());
-    	this.outgoingRequests.remove(myAccount.getUserName());
+		if (myAccount == null) return;
+		String requesterName = this.getUserName();
+		String targetName = myAccount.getUserName();
+		myAccount.incomingRequests.remove(requesterName);
+		this.outgoingRequests.remove(targetName);
 	}
 
 	public void autoAcceptFriendships() {

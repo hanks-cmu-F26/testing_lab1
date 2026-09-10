@@ -118,8 +118,6 @@ public class SocialNetwork implements ISocialNetwork {
 		me.autoAcceptFriendships();
 	}
 
-	// ----- ISocialNetwork stubs (T1): created to satisfy the compiler only -----
-
 	@Override
 	public Account login(Account me) {
 		if (me == null) return null;
@@ -163,31 +161,47 @@ public class SocialNetwork implements ISocialNetwork {
 	@Override
 	public void sendFriendshipCancellationTo(String userName) throws NoUserLoggedInException {
 		requireLoggedIn();
-		// TODO Auto-generated method stub
+		if (userName == null) return;
+		Account friend = findAccountForUserName(userName);
+		if (friend != null && loggedInUser.hasFriend(userName)) {
+			friend.cancelFriendship(loggedInUser);
+		}
 	}
 
 	@Override
 	public void acceptFriendshipFrom(String userName) throws NoUserLoggedInException {
 		requireLoggedIn();
-		// TODO Auto-generated method stub
+		if (userName == null) return;
+		Account requester = findAccountForUserName(userName);
+		if (requester != null && isVisibleToLoggedInUser(requester)) {
+			requester.friendshipAccepted(loggedInUser);
+		}
 	}
 
 	@Override
 	public void acceptAllFriendships() throws NoUserLoggedInException {
 		requireLoggedIn();
-		// TODO Auto-generated method stub
+		for (String requesterName : new HashSet<String>(loggedInUser.getIncomingRequests())) {
+			acceptFriendshipFrom(requesterName);
+		}
 	}
 
 	@Override
 	public void rejectFriendshipFrom(String userName) throws NoUserLoggedInException {
 		requireLoggedIn();
-		// TODO Auto-generated method stub
+		if (userName == null) return;
+		Account requester = findAccountForUserName(userName);
+		if (requester != null) {
+			requester.friendshipRejected(loggedInUser);
+		}
 	}
 
 	@Override
 	public void rejectAllFriendships() throws NoUserLoggedInException {
 		requireLoggedIn();
-		// TODO Auto-generated method stub
+		for (String requesterName : new HashSet<String>(loggedInUser.getIncomingRequests())) {
+			rejectFriendshipFrom(requesterName);
+		}
 	}
 
 	@Override
@@ -232,7 +246,17 @@ public class SocialNetwork implements ISocialNetwork {
 	@Override
 	public void leave() throws NoUserLoggedInException {
 		requireLoggedIn();
-		// TODO Auto-generated method stub
+		Account departingUser = loggedInUser;
+		for (String friendName : new HashSet<String>(departingUser.getFriends())) {
+			Account friend = findAccountForUserName(friendName);
+			if (friend != null) friend.cancelFriendship(departingUser);
+		}
+		for (Account account : accounts) {
+			account.getIncomingRequests().remove(departingUser.getUserName());
+			account.getOutgoingRequests().remove(departingUser.getUserName());
+		}
+		accounts.remove(departingUser);
+		loggedInUser = null;
 	}
 
 }

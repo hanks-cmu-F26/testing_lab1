@@ -225,6 +225,46 @@ public class SocialNetworkTest {
 		assertFalse(me.getIncomingRequests().contains("Cecile"));
 	}
 
+	@Test
+	public void aMemberShouldBeAbleToAcceptAllFriendRequestsAtOnce() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Cecile");
+		Account hakan = sn.join("Hakan");
+		Account serra = sn.join("Serra");
+
+		sn.login(hakan);
+		sn.sendFriendshipTo("Cecile");
+		sn.login(serra);
+		sn.sendFriendshipTo("Cecile");
+		sn.login(me);
+		sn.acceptAllFriendships();
+
+		assertTrue(me.hasFriend("Hakan"));
+		assertTrue(me.hasFriend("Serra"));
+		assertTrue(me.getIncomingRequests().isEmpty());
+	}
+
+	@Test
+	public void aMemberShouldBeAbleToRejectAllFriendRequestsAtOnce() throws Exception {
+		sn = new SocialNetwork();
+		me = sn.join("Cecile");
+		Account hakan = sn.join("Hakan");
+		Account serra = sn.join("Serra");
+
+		sn.login(hakan);
+		sn.sendFriendshipTo("Cecile");
+		sn.login(serra);
+		sn.sendFriendshipTo("Cecile");
+		sn.login(me);
+		sn.rejectAllFriendships();
+
+		assertFalse(me.hasFriend("Hakan"));
+		assertFalse(me.hasFriend("Serra"));
+		assertTrue(me.getIncomingRequests().isEmpty());
+		assertTrue(hakan.getOutgoingRequests().isEmpty());
+		assertTrue(serra.getOutgoingRequests().isEmpty());
+	}
+
 	// ----- T7: recommendFriends -----
 	private void makeFriends(Account a, Account b) {
 		a.requestFriendship(b);
